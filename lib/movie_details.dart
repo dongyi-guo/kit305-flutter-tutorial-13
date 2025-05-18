@@ -5,9 +5,9 @@ import 'movie.dart';
 
 class MovieDetails extends StatefulWidget
 {
-  final int id;
+  final String? id;
 
-  const MovieDetails({Key? key, required this.id}) : super(key: key);
+  const MovieDetails({Key? key, this.id}) : super(key: key);
 
   @override
   State<MovieDetails> createState() => _MovieDetailsState();
@@ -23,8 +23,7 @@ class _MovieDetailsState extends State<MovieDetails> {
   @override
   Widget build(BuildContext context)
   {
-    var movies = Provider.of<MovieModel>(context, listen:false).items;
-    Movie? movie = widget.id != -1 ? movies[widget.id] : null;
+    var movie = Provider.of<MovieModel>(context, listen:false).get(widget.id);
 
     var adding = movie == null;
     if (!adding) {
@@ -62,28 +61,32 @@ class _MovieDetailsState extends State<MovieDetails> {
                             decoration: const InputDecoration(labelText: "Duration"),
                             controller: durationController,
                           ),
-                          ElevatedButton.icon(onPressed: () async {//this function is asynchronous now
-                            if (_formKey.currentState?.validate() ?? false)
-                            {
-                              if (adding)
-                              {
-                                movie = Movie(title:"", duration: 0, year: 0);
-                              }
+                          Consumer<MovieModel>(
+                            builder: (context, movieModel, _) {
+                              return ElevatedButton.icon(onPressed: movieModel.loading ? null : () async {
+                                if (_formKey.currentState?.validate() ?? false)
+                                {
+                                  if (adding) movie = Movie(title:"", duration: 0, year: 0);
 
-                              //update the movie object
-                              movie!.title = titleController.text;
-                              movie!.year = int.parse(yearController.text); //good code would validate these
-                              movie!.duration = double.parse(durationController.text); //good code would validate these
+                                  //update the movie object
+                                  movie!.title = titleController.text;
+                                  movie!.year = int.parse(yearController.text); //good code would validate these
+                                  movie!.duration = double.parse(durationController.text); //good code would validate these
 
-                              //TODO: update the model
+                                  // Update the model
+                                  if (adding){
+                                    await Provider.of<MovieModel>(context, listen: false).add(movie!);
+                                  }
+                                  else{
+                                    await Provider.of<MovieModel>(context, listen: false).updateItem(widget.id!, movie!);
+                                  }
 
-
-
-
-                              //return to previous screen
-                              if (context.mounted)  Navigator.pop(context);
+                                  // Go back
+                                  if (context.mounted)  Navigator.pop(context);
+                                }
+                              }, icon: const Icon(Icons.save), label: const Text("Save"));
                             }
-                          }, icon: const Icon(Icons.save), label: const Text("Save Values"))
+                          )
                         ],
                       ),
                     ),

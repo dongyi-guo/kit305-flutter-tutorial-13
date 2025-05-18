@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import 'movie_details.dart';
 import 'movie.dart';
 
-void main() {
+Future main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  var app = await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  print("\n\nConnected to Firebase App ${app.options.projectId}.\n\n");
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget
@@ -23,7 +33,8 @@ class MyApp extends StatelessWidget
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            home: const MyHomePage(title: 'Database Tutorial')
+            home: const MyHomePage(title: 'Database Tutorial'),
+            debugShowCheckedModeBanner: false,
         )
     );
     //END: the old MyApp builder from last week
@@ -57,31 +68,59 @@ class _MyHomePageState extends State<MyHomePage>
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
 
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(context: context, builder: (context) {
+            return const MovieDetails();
+          });
+        },
+        tooltip: 'Add Movie',
+        child: const Icon(Icons.add),
+      ),
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
 
             //YOUR UI HERE
-            Expanded(
-              child: ListView.builder(
-                  itemBuilder: (_, index) {
-                    var movie = movieModel.items[index];
-                    var image = movie.image;
-                    return ListTile(
-                      title: Text(movie.title),
-                      subtitle: Text("${movie.year} - ${movie.duration} Minutes"),
-                      leading: image != null ? Image.network(image) : null,
+            if (movieModel.loading) const CircularProgressIndicator() else Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => movieModel.fetch(),
+                child: ListView.builder(
+                    itemBuilder: (_, index) {
+                      var movie = movieModel.items[index];
+                      var image = movie.image;
+                      return Dismissible(
+                        key: Key(movie.id),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        onDismissed: (direction) async {
+                          await movieModel.delete(movie.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("${movie.title} deleted")));
+                        },
+                        child: ListTile(
+                          title: Text(movie.title),
+                          subtitle: Text("${movie.year} - ${movie.duration} Minutes"),
+                          leading: image != null ? Image.network(image) : null,
 
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(
-                            builder: (context) {
-                              return MovieDetails(id: index);
-                            }));
-                      },
-                    );
-                  },
-                  itemCount: movieModel.items.length
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(
+                                builder: (context) {
+                                  return MovieDetails(id: movie.id);
+                                }));
+                          },
+                        ),
+                      );
+                    },
+                    itemCount: movieModel.items.length
+                ),
               ),
             )
           ],
