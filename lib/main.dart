@@ -3,8 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
-import 'movie_details.dart';
-import 'movie.dart';
+import 'match_details.dart';
+import 'match_model.dart';
 
 Future main() async{
 
@@ -27,13 +27,13 @@ class MyApp extends StatelessWidget
   Widget build(BuildContext context) {
     //BEGIN: the old MyApp builder from last week
     return ChangeNotifierProvider(
-        create: (context) => MovieModel(),
+        create: (context) => MatchModel(),
         child: MaterialApp(
-            title: 'Database Tutorial',
+            title: 'AFL Counter',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            home: const MyHomePage(title: 'Database Tutorial'),
+            home: const MyHomePage(title: 'AFL Counter'),
             debugShowCheckedModeBanner: false,
         )
     );
@@ -56,12 +56,12 @@ class _MyHomePageState extends State<MyHomePage>
 {
   @override
   Widget build(BuildContext context) {
-    return Consumer<MovieModel>(
-        builder:buildScaffold
+    return Consumer<MatchModel>(
+        builder: buildScaffold
     );
   }
 
-  Scaffold buildScaffold(BuildContext context, MovieModel movieModel, _) {
+  Scaffold buildScaffold(BuildContext context, MatchModel matchModel, _) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -71,10 +71,10 @@ class _MyHomePageState extends State<MyHomePage>
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(context: context, builder: (context) {
-            return const MovieDetails();
+            return const MatchDetails();
           });
         },
-        tooltip: 'Add Movie',
+        tooltip: 'Add Match',
         child: const Icon(Icons.add),
       ),
 
@@ -84,15 +84,14 @@ class _MyHomePageState extends State<MyHomePage>
           children: <Widget>[
 
             //YOUR UI HERE
-            if (movieModel.loading) const CircularProgressIndicator() else Expanded(
+            if (matchModel.loading) const CircularProgressIndicator() else Expanded(
               child: RefreshIndicator(
-                onRefresh: () => movieModel.fetch(),
+                onRefresh: () => matchModel.fetch(),
                 child: ListView.builder(
                     itemBuilder: (_, index) {
-                      var movie = movieModel.items[index];
-                      var image = movie.image;
+                      var match = matchModel.items[index];
                       return Dismissible(
-                        key: Key(movie.id),
+                        key: Key(match.id),
                         direction: DismissDirection.endToStart,
                         background: Container(
                           color: Colors.red,
@@ -101,25 +100,23 @@ class _MyHomePageState extends State<MyHomePage>
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         onDismissed: (direction) async {
-                          await movieModel.delete(movie.id);
+                          await matchModel.delete(match.id);
                           ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("${movie.title} deleted")));
+                              const SnackBar(content: Text("Match deleted")));
                         },
                         child: ListTile(
-                          title: Text(movie.title),
-                          subtitle: Text("${movie.year} - ${movie.duration} Minutes"),
-                          leading: image != null ? Image.network(image) : null,
+                          title: Text("${match.teamAId} vs ${match.teamBId}"),
 
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(
                                 builder: (context) {
-                                  return MovieDetails(id: movie.id);
+                                  return MatchDetails(id: match.id);
                                 }));
                           },
                         ),
                       );
                     },
-                    itemCount: movieModel.items.length
+                    itemCount: matchModel.items.length
                 ),
               ),
             )
