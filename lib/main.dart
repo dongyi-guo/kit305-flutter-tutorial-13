@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
-import 'match_details.dart';
+import 'match_briefing.dart';
 import 'match_model.dart';
 import 'team_model.dart';
 import 'player_model.dart';
@@ -120,10 +120,11 @@ class _MyHomePageState extends State<MyHomePage>
                             title: Text("${teamModel.get(match.teamAId)?.name ?? match.teamAId} vs ${teamModel.get(match.teamBId)?.name ?? match.teamBId}"),
                             subtitle: Text(match.started ? 'Started' : 'Not started'),
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) {
-                                    return MatchDetails(id: match.id);
-                                  }));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          MatchBriefingPage(matchId: match.id)));
                             },
                           ),
                         );
