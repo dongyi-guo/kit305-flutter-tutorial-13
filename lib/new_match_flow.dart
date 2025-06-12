@@ -6,6 +6,7 @@ import 'player_form.dart';
 import 'team_model.dart';
 import 'player_model.dart';
 import 'match_model.dart';
+import 'match_briefing.dart';
 
 /// Step based UI for creating a match with teams and players.
 class NewMatchFlow extends StatefulWidget {
@@ -198,8 +199,12 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
 
     // Save match
     var match = MatchData(teamAId: teamA.id, teamBId: teamB.id);
-    await matchModel.add(match);
+    match.id = await matchModel.add(match);
 
-    if (mounted) Navigator.pop(context);
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => MatchBriefingPage(matchId: match.id)),
+    );
   }
 }

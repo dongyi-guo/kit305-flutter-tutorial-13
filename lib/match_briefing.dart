@@ -8,9 +8,8 @@ import 'match_model.dart';
 import 'team_model.dart';
 import 'player_model.dart';
 
-/// Displays the teams and players for a match before it starts.
-/// Users can go back or start the match, which simply marks the
-/// match as started in Firestore for now.
+/// Displays a summary of the two teams before recording a match.
+/// Users can discard the match or proceed to start recording.
 class MatchBriefingPage extends StatelessWidget {
   final String matchId;
 
@@ -49,29 +48,16 @@ class MatchBriefingPage extends StatelessWidget {
         title: const Text('Match Briefing'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: ListView(
+      body: Padding(
         padding: const EdgeInsets.all(8),
-        children: [
-          Text('Team A: ${teamA?.name ?? match.teamAId}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ...teamAPlayers.map((p) => ListTile(
-                leading: p.image != null
-                    ? Image.file(File(p.image!), width: 40)
-                    : null,
-                title: Text(p.name),
-                subtitle: Text('No. ${p.number}'),
-              )),
-          const SizedBox(height: 10),
-          Text('Team B: ${teamB?.name ?? match.teamBId}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ...teamBPlayers.map((p) => ListTile(
-                leading: p.image != null
-                    ? Image.file(File(p.image!), width: 40)
-                    : null,
-                title: Text(p.name),
-                subtitle: Text('No. ${p.number}'),
-              )),
-        ],
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: _teamColumn(teamA?.name ?? match.teamAId, teamAPlayers)),
+            const SizedBox(width: 8),
+            Expanded(child: _teamColumn(teamB?.name ?? match.teamBId, teamBPlayers)),
+          ],
+        ),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8),
@@ -79,25 +65,42 @@ class MatchBriefingPage extends StatelessWidget {
           children: [
             Expanded(
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Back'),
+                onPressed: () async {
+                  await matchModel.delete(match.id);
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: const Text('Discard'),
               ),
             ),
             const SizedBox(width: 8),
-            if (!match.started)
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    match.started = true;
-                    await matchModel.updateItem(match.id, match);
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                  child: const Text('Start Match'),
-                ),
-              )
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  // Placeholder for live recording screen
+                  Navigator.pop(context);
+                },
+                child: const Text('Start Match'),
+              ),
+            )
           ],
         ),
       ),
+    );
+  }
+
+  Widget _teamColumn(String name, List<Player> players) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        ...players.map((p) => ListTile(
+              dense: true,
+              leading: p.image != null ? Image.file(File(p.image!), width: 40) : null,
+              title: Text(p.name),
+              subtitle: Text('No. ${p.number}'),
+            )),
+      ],
     );
   }
 }

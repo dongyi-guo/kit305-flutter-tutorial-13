@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage>
                           },
                           child: ListTile(
                             title: Text("${teamModel.get(match.teamAId)?.name ?? match.teamAId} vs ${teamModel.get(match.teamBId)?.name ?? match.teamBId}"),
-                            subtitle: Text(match.started ? 'Started' : 'Not started'),
+                            // No status tracking for now
                             onTap: () {
                               Navigator.push(
                                   context,
