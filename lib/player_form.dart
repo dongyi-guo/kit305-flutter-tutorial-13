@@ -67,7 +67,11 @@ class _PlayerFormState extends State<PlayerForm> {
                 decoration: const InputDecoration(labelText: 'Number'),
                 controller: numberController,
                 keyboardType: TextInputType.number,
-                validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Required';
+                  if (int.tryParse(value) == null) return 'Must be a number';
+                  return null;
+                },
               ),
               ElevatedButton.icon(
                 onPressed: () {

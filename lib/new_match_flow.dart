@@ -59,6 +59,12 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
+                if (teamAController.text.trim().isEmpty ||
+                    teamBController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Team names required')));
+                  return;
+                }
                 setState(() => step = 1);
               },
               child: const Text('Next'),
@@ -138,6 +144,23 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
+                  if (step == 1 && teamAPlayers.length < 2) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Add at least two players')));
+                    return;
+                  }
+                  if (step == 2) {
+                    if (teamBPlayers.length < 2) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Add at least two players')));
+                      return;
+                    }
+                    if (teamBPlayers.length != teamAPlayers.length) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Teams must have equal number of players')));
+                      return;
+                    }
+                  }
                   setState(() => step++);
                 },
                 child: Text(nextLabel),
@@ -191,6 +214,14 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
   }
 
   Future<void> _saveMatch() async {
+    if (teamAPlayers.length < 2 ||
+        teamBPlayers.length < 2 ||
+        teamAPlayers.length != teamBPlayers.length) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Each team needs an equal number of at least two players')));
+      return;
+    }
+
     var teamModel = Provider.of<TeamModel>(context, listen: false);
     var playerModel = Provider.of<PlayerModel>(context, listen: false);
     var matchModel = Provider.of<MatchModel>(context, listen: false);
