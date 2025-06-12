@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 
 import 'match_details.dart';
 import 'match_model.dart';
+import 'team_model.dart';
+import 'player_model.dart';
+import 'team_list.dart';
 
 Future main() async{
 
@@ -26,16 +29,20 @@ class MyApp extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     //BEGIN: the old MyApp builder from last week
-    return ChangeNotifierProvider(
-        create: (context) => MatchModel(),
-        child: MaterialApp(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MatchModel()),
+        ChangeNotifierProvider(create: (_) => TeamModel()),
+        ChangeNotifierProvider(create: (_) => PlayerModel()),
+      ],
+      child: MaterialApp(
             title: 'AFL Counter',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
             home: const MyHomePage(title: 'AFL Counter'),
             debugShowCheckedModeBanner: false,
-        )
+      ),
     );
     //END: the old MyApp builder from last week
   }
@@ -66,6 +73,15 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const TeamListPage()));
+            },
+            icon: const Icon(Icons.group),
+          )
+        ],
       ),
 
       floatingActionButton: FloatingActionButton(

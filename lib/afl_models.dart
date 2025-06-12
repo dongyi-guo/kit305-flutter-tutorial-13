@@ -26,17 +26,19 @@ class PlayerAction {
 
 /// Representation of a player.
 class Player {
-  Player({required this.name, required this.number, List<PlayerAction>? actions})
+  Player({required this.name, required this.number, this.image, List<PlayerAction>? actions})
       : actions = actions ?? [];
 
   late String id;
   String name;
   int number;
+  String? image;
   List<PlayerAction> actions;
 
   Player.fromMap(Map<String, dynamic> map, this.id)
       : name = map['name'] as String,
         number = (map['number'] ?? 0) as int,
+        image = map['image'] as String?,
         actions = (map['actions'] as List<dynamic>? ?? [])
             .map((a) => PlayerAction.fromMap(a as Map<String, dynamic>))
             .toList();
@@ -44,6 +46,7 @@ class Player {
   Map<String, dynamic> toMap() => {
         'name': name,
         'number': number,
+        'image': image,
         'actions': actions.map((a) => a.toMap()).toList(),
       };
 }
