@@ -14,7 +14,7 @@ import 'player_model.dart';
 class MatchBriefingPage extends StatelessWidget {
   final String matchId;
 
-  const MatchBriefingPage({super.key, required this.matchId});
+  const MatchBriefingPage({Key? key, required this.matchId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
