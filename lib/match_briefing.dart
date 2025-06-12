@@ -7,6 +7,7 @@ import 'afl_models.dart';
 import 'match_model.dart';
 import 'team_model.dart';
 import 'player_model.dart';
+import 'live_match_page.dart';
 
 /// Displays a summary of the two teams before recording a match.
 /// Users can discard the match or proceed to start recording.
@@ -76,8 +77,11 @@ class MatchBriefingPage extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  // Placeholder for live recording screen
-                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => LiveMatchPage(matchId: match.id)),
+                  );
                 },
                 child: const Text('Start Match'),
               ),

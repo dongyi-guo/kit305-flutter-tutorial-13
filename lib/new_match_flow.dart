@@ -123,11 +123,27 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8),
-        child: ElevatedButton(
-          onPressed: () {
-            setState(() => step++);
-          },
-          child: Text(nextLabel),
+        child: Row(
+          children: [
+            if (step > 0)
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() => step--);
+                  },
+                  child: const Text('Back'),
+                ),
+              ),
+            if (step > 0) const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() => step++);
+                },
+                child: Text(nextLabel),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -156,9 +172,9 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  setState(() => step = 2);
                 },
-                child: const Text('Cancel'),
+                child: const Text('Back'),
               ),
             ),
             const SizedBox(width: 8),
