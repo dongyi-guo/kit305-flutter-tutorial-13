@@ -13,12 +13,13 @@ class TeamModel extends ChangeNotifier {
     fetch();
   }
 
-  Future add(Team item) async {
+  Future<String> add(Team item) async {
     loading = true;
     update();
 
-    await teamsCollection.add(item.toMap());
+    var doc = await teamsCollection.add(item.toMap());
     await fetch();
+    return doc.id;
   }
 
   Future updateItem(String id, Team item) async {

@@ -71,18 +71,21 @@ class Team {
 
 /// Representation of a match containing ids of the two teams.
 class MatchData {
-  MatchData({required this.teamAId, required this.teamBId});
+  MatchData({required this.teamAId, required this.teamBId, this.started = false});
 
   late String id;
   String teamAId;
   String teamBId;
+  bool started;
 
   MatchData.fromMap(Map<String, dynamic> map, this.id)
       : teamAId = map['team_a'] as String,
-        teamBId = map['team_b'] as String;
+        teamBId = map['team_b'] as String,
+        started = map['started'] as bool? ?? false;
 
   Map<String, dynamic> toMap() => {
         'team_a': teamAId,
         'team_b': teamBId,
+        'started': started,
       };
 }

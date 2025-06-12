@@ -15,12 +15,13 @@ class MatchModel extends ChangeNotifier {
     fetch();
   }
 
-  Future add(MatchData item) async {
+  Future<String> add(MatchData item) async {
     loading = true;
     update();
 
-    await matchesCollection.add(item.toMap());
+    var doc = await matchesCollection.add(item.toMap());
     await fetch();
+    return doc.id;
   }
 
   Future updateItem(String id, MatchData item) async {

@@ -7,7 +7,7 @@ import 'match_details.dart';
 import 'match_model.dart';
 import 'team_model.dart';
 import 'player_model.dart';
-import 'team_list.dart';
+import 'new_match_flow.dart';
 
 Future main() async{
 
@@ -73,22 +73,12 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const TeamListPage()));
-            },
-            icon: const Icon(Icons.group),
-          )
-        ],
       ),
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(context: context, builder: (context) {
-            return const MatchDetails();
-          });
+          Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const NewMatchFlow()));
         },
         tooltip: 'Add Match',
         child: const Icon(Icons.add),
@@ -106,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage>
                 child: ListView.builder(
                     itemBuilder: (_, index) {
                       var match = matchModel.items[index];
+                      var teamModel = Provider.of<TeamModel>(context, listen: false);
                       return Dismissible(
                         key: Key(match.id),
                         direction: DismissDirection.endToStart,
@@ -121,8 +112,8 @@ class _MyHomePageState extends State<MyHomePage>
                               const SnackBar(content: Text("Match deleted")));
                         },
                         child: ListTile(
-                          title: Text("${match.teamAId} vs ${match.teamBId}"),
-
+                          title: Text("${teamModel.get(match.teamAId)?.name ?? match.teamAId} vs ${teamModel.get(match.teamBId)?.name ?? match.teamBId}"),
+                          subtitle: Text(match.started ? 'Started' : 'Not started'),
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(
                                 builder: (context) {
