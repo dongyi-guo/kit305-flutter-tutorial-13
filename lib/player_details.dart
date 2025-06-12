@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,7 +20,7 @@ class _PlayerDetailsState extends State<PlayerDetails> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final numberController = TextEditingController();
-  String? imagePath;
+  String? imageData;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class _PlayerDetailsState extends State<PlayerDetails> {
     if (!adding) {
       nameController.text = player.name;
       numberController.text = player.number.toString();
-      imagePath = player.image;
+      imageData = player.image;
     }
 
     return Scaffold(
@@ -45,15 +45,16 @@ class _PlayerDetailsState extends State<PlayerDetails> {
           key: _formKey,
           child: Column(
             children: [
-              if (imagePath != null)
-                Image.file(File(imagePath!), height: 120),
+              if (imageData != null)
+                Image.memory(base64Decode(imageData!), height: 120),
               TextButton.icon(
                 onPressed: () async {
                   final picker = ImagePicker();
                   final image = await picker.pickImage(source: ImageSource.gallery);
                   if (image != null) {
+                    final bytes = await image.readAsBytes();
                     setState(() {
-                      imagePath = image.path;
+                      imageData = base64Encode(bytes);
                     });
                   }
                 },
@@ -80,7 +81,7 @@ class _PlayerDetailsState extends State<PlayerDetails> {
                             }
                             player!.name = nameController.text;
                             player!.number = int.tryParse(numberController.text) ?? 0;
-                            player!.image = imagePath;
+                            player!.image = imageData;
                             if (adding) {
                               String newId = await model.add(player!);
                               if (widget.teamId != null) {

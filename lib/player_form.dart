@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,7 +17,7 @@ class _PlayerFormState extends State<PlayerForm> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final numberController = TextEditingController();
-  String? imagePath;
+  String? imageData;
 
   @override
   void initState() {
@@ -25,7 +25,7 @@ class _PlayerFormState extends State<PlayerForm> {
     if (widget.player != null) {
       nameController.text = widget.player!.name;
       numberController.text = widget.player!.number.toString();
-      imagePath = widget.player!.image;
+      imageData = widget.player!.image;
     }
   }
 
@@ -42,15 +42,16 @@ class _PlayerFormState extends State<PlayerForm> {
           key: _formKey,
           child: Column(
             children: [
-              if (imagePath != null)
-                Image.file(File(imagePath!), height: 120),
+              if (imageData != null)
+                Image.memory(base64Decode(imageData!), height: 120),
               TextButton.icon(
                 onPressed: () async {
                   final picker = ImagePicker();
                   final image = await picker.pickImage(source: ImageSource.gallery);
                   if (image != null) {
+                    final bytes = await image.readAsBytes();
                     setState(() {
-                      imagePath = image.path;
+                      imageData = base64Encode(bytes);
                     });
                   }
                 },
@@ -74,7 +75,7 @@ class _PlayerFormState extends State<PlayerForm> {
                     var player = widget.player ?? Player(name: '', number: 0);
                     player.name = nameController.text;
                     player.number = int.tryParse(numberController.text) ?? 0;
-                    player.image = imagePath;
+                    player.image = imageData;
                     Navigator.pop(context, player);
                   }
                 },

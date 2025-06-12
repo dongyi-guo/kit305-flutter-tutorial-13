@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -100,7 +100,7 @@ class MatchBriefingPage extends StatelessWidget {
         const SizedBox(height: 4),
         ...players.map((p) => ListTile(
               dense: true,
-              leading: p.image != null ? Image.file(File(p.image!), width: 40) : null,
+              leading: p.image != null ? Image.memory(base64Decode(p.image!), width: 40) : null,
               title: Text(p.name),
               subtitle: Text('No. ${p.number}'),
             )),
