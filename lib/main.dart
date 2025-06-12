@@ -90,43 +90,48 @@ class _MyHomePageState extends State<MyHomePage>
           children: <Widget>[
 
             //YOUR UI HERE
-            if (matchModel.loading) const CircularProgressIndicator() else Expanded(
-              child: RefreshIndicator(
-                onRefresh: () => matchModel.fetch(),
-                child: ListView.builder(
-                    itemBuilder: (_, index) {
-                      var match = matchModel.items[index];
-                      var teamModel = Provider.of<TeamModel>(context, listen: false);
-                      return Dismissible(
-                        key: Key(match.id),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: const Icon(Icons.delete, color: Colors.white),
-                        ),
-                        onDismissed: (direction) async {
-                          await matchModel.delete(match.id);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Match deleted")));
-                        },
-                        child: ListTile(
-                          title: Text("${teamModel.get(match.teamAId)?.name ?? match.teamAId} vs ${teamModel.get(match.teamBId)?.name ?? match.teamBId}"),
-                          subtitle: Text(match.started ? 'Started' : 'Not started'),
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(
-                                builder: (context) {
-                                  return MatchDetails(id: match.id);
-                                }));
+            if (matchModel.loading)
+              const CircularProgressIndicator()
+            else if (matchModel.items.isEmpty)
+              const Text('No matches yet')
+            else
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () => matchModel.fetch(),
+                  child: ListView.builder(
+                      itemBuilder: (_, index) {
+                        var match = matchModel.items[index];
+                        var teamModel = Provider.of<TeamModel>(context, listen: false);
+                        return Dismissible(
+                          key: Key(match.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          onDismissed: (direction) async {
+                            await matchModel.delete(match.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Match deleted")));
                           },
-                        ),
-                      );
-                    },
-                    itemCount: matchModel.items.length
+                          child: ListTile(
+                            title: Text("${teamModel.get(match.teamAId)?.name ?? match.teamAId} vs ${teamModel.get(match.teamBId)?.name ?? match.teamBId}"),
+                            subtitle: Text(match.started ? 'Started' : 'Not started'),
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return MatchDetails(id: match.id);
+                                  }));
+                            },
+                          ),
+                        );
+                      },
+                      itemCount: matchModel.items.length
+                  ),
                 ),
-              ),
-            )
+              )
           ],
         ),
       ),

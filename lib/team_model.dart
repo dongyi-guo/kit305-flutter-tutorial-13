@@ -60,6 +60,11 @@ class TeamModel extends ChangeNotifier {
   }
 
   Team? get(String? id) {
-    return (id == null) ? null : items.firstWhere((t) => t.id == id);
+    if (id == null) return null;
+    try {
+      return items.firstWhere((t) => t.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 }

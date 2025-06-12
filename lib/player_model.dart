@@ -60,6 +60,11 @@ class PlayerModel extends ChangeNotifier {
   }
 
   Player? get(String? id) {
-    return (id == null) ? null : items.firstWhere((p) => p.id == id);
+    if (id == null) return null;
+    try {
+      return items.firstWhere((p) => p.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 }

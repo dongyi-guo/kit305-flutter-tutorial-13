@@ -62,7 +62,12 @@ class MatchModel extends ChangeNotifier {
   }
 
   MatchData? get(String? id) {
-    return (id == null) ? null : items.firstWhere((m) => m.id == id);
+    if (id == null) return null;
+    try {
+      return items.firstWhere((m) => m.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 }
 

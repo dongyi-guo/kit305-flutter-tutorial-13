@@ -98,6 +98,11 @@ class MovieModel extends ChangeNotifier {
   }
 
   Movie? get(String? id){
-    return (id == null) ? null : items.firstWhere((movie) => movie.id == id);
+    if(id == null) return null;
+    try {
+      return items.firstWhere((movie) => movie.id == id);
+    } catch(_) {
+      return null;
+    }
   }
 }
