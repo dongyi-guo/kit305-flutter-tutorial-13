@@ -16,10 +16,7 @@ Future main() async{
   var app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  print("\n\nConnected to Firebase App ${app.options.projectId}.\n\n");
   runApp(const MyApp());
-
 }
 
 class MyApp extends StatelessWidget
