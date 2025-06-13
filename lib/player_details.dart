@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'player_model.dart';
 import 'team_model.dart';
 import 'afl_models.dart';
@@ -69,6 +70,7 @@ class _PlayerDetailsState extends State<PlayerDetails> {
                 decoration: const InputDecoration(labelText: 'Number'),
                 controller: numberController,
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
               Consumer<PlayerModel>(
                 builder: (_, model, __) => ElevatedButton.icon(
@@ -82,6 +84,22 @@ class _PlayerDetailsState extends State<PlayerDetails> {
                             player!.name = nameController.text;
                             player!.number = int.tryParse(numberController.text) ?? 0;
                             player!.image = imageData;
+
+                            if (widget.teamId != null) {
+                              var teamModel = Provider.of<TeamModel>(context, listen: false);
+                              var team = teamModel.get(widget.teamId);
+                              if (team != null) {
+                                var existingPlayers = Provider.of<PlayerModel>(context, listen: false)
+                                    .items
+                                    .where((p) => team.players.contains(p.id));
+                                if (existingPlayers.any((p) => p.number == player!.number && p.id != widget.id)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Duplicate player number')));
+                                  return;
+                                }
+                              }
+                            }
+
                             if (adding) {
                               String newId = await model.add(player!);
                               if (widget.teamId != null) {

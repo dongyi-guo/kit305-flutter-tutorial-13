@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 import 'afl_models.dart';
 
 /// Form used for creating or editing a [Player] without touching Firestore.
@@ -67,6 +68,7 @@ class _PlayerFormState extends State<PlayerForm> {
                 decoration: const InputDecoration(labelText: 'Number'),
                 controller: numberController,
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Required';
                   if (int.tryParse(value) == null) return 'Must be a number';

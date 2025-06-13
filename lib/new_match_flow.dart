@@ -32,9 +32,9 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
       case 1:
         return _playerStep(teamAPlayers, 'Team A', nextLabel: 'Next');
       case 2:
-        return _playerStep(teamBPlayers, 'Team B', nextLabel: 'Summary');
+        return _playerStep(teamBPlayers, 'Team B', nextLabel: 'Create Match');
       default:
-        return _summaryStep();
+        return _teamNameStep();
     }
   }
 
@@ -75,7 +75,8 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
     );
   }
 
-  Widget _playerStep(List<Player> players, String title, {String nextLabel = 'Next'}) {
+  Widget _playerStep(List<Player> players, String title,
+      {String nextLabel = 'Next'}) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Players - $title'),
@@ -86,6 +87,11 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
           var player = await Navigator.push<Player?>(
               context, MaterialPageRoute(builder: (_) => const PlayerForm()));
           if (player != null) {
+            if (players.any((p) => p.number == player.number)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Duplicate player number')));
+              return;
+            }
             setState(() {
               players.add(player);
             });
@@ -93,40 +99,52 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
         },
         child: const Icon(Icons.add),
       ),
-      body: ListView.builder(
-        itemCount: players.length,
-        itemBuilder: (_, index) {
-          var p = players[index];
-          return Dismissible(
-            key: Key('$index${p.name}'),
-            direction: DismissDirection.endToStart,
-            onDismissed: (_) {
-              setState(() {
-                players.removeAt(index);
-              });
-            },
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: const Icon(Icons.delete, color: Colors.white),
-            ),
-            child: ListTile(
-              title: Text(p.name),
-              subtitle: Text('No. ${p.number}'),
-              onTap: () async {
-                var updated = await Navigator.push<Player?>(
-                    context, MaterialPageRoute(builder: (_) => PlayerForm(player: p)));
-                if (updated != null) {
-                  setState(() {
-                    players[index] = updated;
-                  });
-                }
+      body: players.isEmpty
+          ? const Center(
+              child: Text(
+                  'Add players using the + button. Each team needs at least two players.'))
+          : ListView.builder(
+              itemCount: players.length,
+              itemBuilder: (_, index) {
+                var p = players[index];
+                return Dismissible(
+                  key: Key('$index${p.name}'),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (_) {
+                    setState(() {
+                      players.removeAt(index);
+                    });
+                  },
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  child: ListTile(
+                    title: Text(p.name),
+                    subtitle: Text('No. ${p.number}'),
+                    onTap: () async {
+                      var updated = await Navigator.push<Player?>(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => PlayerForm(player: p)));
+                      if (updated != null) {
+                        if (players
+                            .any((other) => other != p && other.number == updated.number)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Duplicate player number')));
+                          return;
+                        }
+                        setState(() {
+                          players[index] = updated;
+                        });
+                      }
+                    },
+                  ),
+                );
               },
             ),
-          );
-        },
-      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8),
         child: Row(
@@ -160,6 +178,8 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
                           content: Text('Teams must have equal number of players')));
                       return;
                     }
+                    _saveMatch();
+                    return;
                   }
                   setState(() => step++);
                 },
@@ -172,46 +192,6 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
     );
   }
 
-  Widget _summaryStep() {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Match Summary'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(8),
-        children: [
-          Text('Team A: ${teamAController.text}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ...teamAPlayers.map((p) => Text(' - ${p.name} (#${p.number})')),
-          const SizedBox(height: 10),
-          Text('Team B: ${teamBController.text}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ...teamBPlayers.map((p) => Text(' - ${p.name} (#${p.number})')),
-        ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() => step = 2);
-                },
-                child: const Text('Back'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _saveMatch,
-                child: const Text('Save'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Future<void> _saveMatch() async {
     if (teamAPlayers.length < 2 ||
