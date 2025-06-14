@@ -20,7 +20,11 @@ class MatchModel extends ChangeNotifier {
     update();
 
     var doc = await matchesCollection.add(item.toMap());
-    await fetch();
+    item.id = doc.id;
+    items.add(item);
+
+    loading = false;
+    update();
     return doc.id;
   }
 
@@ -29,7 +33,12 @@ class MatchModel extends ChangeNotifier {
     update();
 
     await matchesCollection.doc(id).update(item.toMap());
-    await fetch();
+
+    var index = items.indexWhere((m) => m.id == id);
+    if (index != -1) items[index] = item;
+
+    loading = false;
+    update();
   }
 
   Future delete(String id) async {
@@ -37,7 +46,11 @@ class MatchModel extends ChangeNotifier {
     update();
 
     await matchesCollection.doc(id).delete();
-    await fetch();
+
+    items.removeWhere((m) => m.id == id);
+
+    loading = false;
+    update();
   }
 
   void update() {

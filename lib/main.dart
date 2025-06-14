@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'match_briefing.dart';
 import 'model/match_model.dart';
+import 'model/afl_models.dart';
 import 'new_match_flow.dart';
 
 Future main() async{
@@ -94,6 +95,20 @@ class _MyHomePageState extends State<MyHomePage>
                   child: ListView.builder(
                       itemBuilder: (_, index) {
                         var match = matchModel.items[index];
+                        String scoreFor(List<Player> players) {
+                          int goals = 0;
+                          int behinds = 0;
+                          for (var p in players) {
+                            for (var a in p.actions) {
+                              if (a.type == ActionType.goal) goals++;
+                              if (a.type == ActionType.behind) behinds++;
+                            }
+                          }
+                          int total = goals * 6 + behinds;
+                          return '$goals.$behinds ($total)';
+                        }
+                        var score =
+                            '${scoreFor(match.teamAPlayers)} vs ${scoreFor(match.teamBPlayers)}';
                         return Dismissible(
                           key: Key(match.id),
                           direction: DismissDirection.endToStart,
@@ -110,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage>
                           },
                           child: ListTile(
                             title: Text("${match.teamAName} vs ${match.teamBName}"),
-                            // No status tracking for now
+                            subtitle: Text(score),
                             onTap: () {
                               Navigator.push(
                                   context,
