@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'model/afl_models.dart';
+import 'afl_models.dart';
 
 /// Provider model that stores and retrieves [MatchData] objects from
 /// Firebase Firestore.
