@@ -3,8 +3,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
-import 'movie_details.dart';
-import 'movie.dart';
+import 'match_briefing.dart';
+import 'match_details_page.dart';
+import 'model/match_model.dart';
+import 'model/afl_models.dart';
+import 'new_match_flow.dart';
 
 Future main() async{
 
@@ -13,10 +16,7 @@ Future main() async{
   var app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  print("\n\nConnected to Firebase App ${app.options.projectId}.\n\n");
   runApp(const MyApp());
-
 }
 
 class MyApp extends StatelessWidget
@@ -26,16 +26,18 @@ class MyApp extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     //BEGIN: the old MyApp builder from last week
-    return ChangeNotifierProvider(
-        create: (context) => MovieModel(),
-        child: MaterialApp(
-            title: 'Database Tutorial',
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MatchModel()),
+      ],
+      child: MaterialApp(
+            title: 'AFL Counter',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            home: const MyHomePage(title: 'Database Tutorial'),
+            home: const MyHomePage(title: 'AFL Counter'),
             debugShowCheckedModeBanner: false,
-        )
+      ),
     );
     //END: the old MyApp builder from last week
   }
@@ -56,12 +58,12 @@ class _MyHomePageState extends State<MyHomePage>
 {
   @override
   Widget build(BuildContext context) {
-    return Consumer<MovieModel>(
-        builder:buildScaffold
+    return Consumer<MatchModel>(
+        builder: buildScaffold
     );
   }
 
-  Scaffold buildScaffold(BuildContext context, MovieModel movieModel, _) {
+  Scaffold buildScaffold(BuildContext context, MatchModel matchModel, _) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -70,11 +72,10 @@ class _MyHomePageState extends State<MyHomePage>
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(context: context, builder: (context) {
-            return const MovieDetails();
-          });
+          Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const NewMatchFlow()));
         },
-        tooltip: 'Add Movie',
+        tooltip: 'Add Match',
         child: const Icon(Icons.add),
       ),
 
@@ -84,45 +85,62 @@ class _MyHomePageState extends State<MyHomePage>
           children: <Widget>[
 
             //YOUR UI HERE
-            if (movieModel.loading) const CircularProgressIndicator() else Expanded(
-              child: RefreshIndicator(
-                onRefresh: () => movieModel.fetch(),
-                child: ListView.builder(
-                    itemBuilder: (_, index) {
-                      var movie = movieModel.items[index];
-                      var image = movie.image;
-                      return Dismissible(
-                        key: Key(movie.id),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: const Icon(Icons.delete, color: Colors.white),
-                        ),
-                        onDismissed: (direction) async {
-                          await movieModel.delete(movie.id);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("${movie.title} deleted")));
-                        },
-                        child: ListTile(
-                          title: Text(movie.title),
-                          subtitle: Text("${movie.year} - ${movie.duration} Minutes"),
-                          leading: image != null ? Image.network(image) : null,
-
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(
-                                builder: (context) {
-                                  return MovieDetails(id: movie.id);
-                                }));
+            if (matchModel.loading)
+              const CircularProgressIndicator()
+            else if (matchModel.items.isEmpty)
+              const Text('No matches yet')
+            else
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () => matchModel.fetch(),
+                  child: ListView.builder(
+                      itemBuilder: (_, index) {
+                        var match = matchModel.items[index];
+                        String scoreFor(List<Player> players) {
+                          int goals = 0;
+                          int behinds = 0;
+                          for (var p in players) {
+                            for (var a in p.actions) {
+                              if (a.type == ActionType.goal) goals++;
+                              if (a.type == ActionType.behind) behinds++;
+                            }
+                          }
+                          int total = goals * 6 + behinds;
+                          return '$goals.$behinds ($total)';
+                        }
+                        var score =
+                            '${scoreFor(match.teamAPlayers)} vs ${scoreFor(match.teamBPlayers)}';
+                        return Dismissible(
+                          key: Key(match.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          onDismissed: (direction) async {
+                            await matchModel.delete(match.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Match deleted")));
                           },
-                        ),
-                      );
-                    },
-                    itemCount: movieModel.items.length
+                          child: ListTile(
+                            title: Text("${match.teamAName} vs ${match.teamBName}"),
+                            subtitle: Text(score),
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          MatchDetailsPage(matchId: match.id)));
+                            },
+                          ),
+                        );
+                      },
+                      itemCount: matchModel.items.length
+                  ),
                 ),
-              ),
-            )
+              )
           ],
         ),
       ),
