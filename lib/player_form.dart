@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
-import 'afl_models.dart';
+import 'model/afl_models.dart';
 
 /// Form used for creating or editing a [Player] without touching Firestore.
 class PlayerForm extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'team_model.dart';
+import 'model/team_model.dart';
 import 'team_details.dart';
 
 class TeamListPage extends StatelessWidget {

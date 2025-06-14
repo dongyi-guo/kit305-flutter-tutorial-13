@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'afl_models.dart';
-import 'match_model.dart';
-import 'team_model.dart';
-import 'player_model.dart';
+import 'model/afl_models.dart';
+import 'model/match_model.dart';
 
 /// Simple live match recording page that lets users
 /// select a player and record actions for them.
@@ -20,7 +18,7 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
   late DateTime startTime;
   int quarter = 1;
   bool teamASelected = true;
-  String? selectedPlayerId;
+  Player? selectedPlayer;
 
   @override
   void initState() {
@@ -31,8 +29,6 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
   @override
   Widget build(BuildContext context) {
     final matchModel = Provider.of<MatchModel>(context);
-    final teamModel = Provider.of<TeamModel>(context);
-    final playerModel = Provider.of<PlayerModel>(context);
 
     final match = matchModel.get(widget.matchId);
     if (match == null) {
@@ -42,24 +38,11 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
       );
     }
 
-    final teamA = teamModel.get(match.teamAId);
-    final teamB = teamModel.get(match.teamBId);
-
-    final teamAPlayers = teamA == null
-        ? <Player>[]
-        : playerModel.items
-            .where((p) => teamA.players.contains(p.id))
-            .toList();
-    final teamBPlayers = teamB == null
-        ? <Player>[]
-        : playerModel.items
-            .where((p) => teamB.players.contains(p.id))
-            .toList();
+    final teamAPlayers = match.teamAPlayers;
+    final teamBPlayers = match.teamBPlayers;
 
     final players = teamASelected ? teamAPlayers : teamBPlayers;
-    final selected = selectedPlayerId != null
-        ? playerModel.get(selectedPlayerId)
-        : null;
+    final selected = selectedPlayer;
 
     String scoreFor(List<Player> ps) {
       int goals = 0;
@@ -95,7 +78,7 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
         timestamp: DateTime.now().difference(startTime).inSeconds,
       );
       selected.actions.add(action);
-      await playerModel.updateItem(selected.id, selected);
+      await matchModel.updateItem(match.id, match);
       setState(() {});
     }
 
@@ -111,11 +94,11 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(teamA?.name ?? match.teamAId),
+                Text(match.teamAName),
                 Text(scoreFor(teamAPlayers)),
                 const Text(' - '),
                 Text(scoreFor(teamBPlayers)),
-                Text(teamB?.name ?? match.teamBId),
+                Text(match.teamBName),
               ],
             ),
           ),
@@ -124,17 +107,17 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
             onPressed: (index) {
               setState(() {
                 teamASelected = index == 0;
-                selectedPlayerId = null;
+                selectedPlayer = null;
               });
             },
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(teamA?.name ?? 'Team A'),
+                child: Text(match.teamAName),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(teamB?.name ?? 'Team B'),
+                child: Text(match.teamBName),
               ),
             ],
           ),
@@ -145,11 +128,11 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
               itemCount: players.length,
               itemBuilder: (_, index) {
                 var p = players[index];
-                bool selectedFlag = p.id == selectedPlayerId;
+                bool selectedFlag = p == selectedPlayer;
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      selectedPlayerId = p.id;
+                      selectedPlayer = p;
                     });
                   },
                   child: Container(

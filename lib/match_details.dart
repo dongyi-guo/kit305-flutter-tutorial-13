@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'match_model.dart';
-import 'afl_models.dart';
+import 'model/match_model.dart';
+import 'model/afl_models.dart';
 
 /// Form used for creating or editing a [MatchData] entry.
 class MatchDetails extends StatefulWidget {
@@ -24,8 +24,8 @@ class _MatchDetailsState extends State<MatchDetails> {
 
     var adding = match == null;
     if (!adding) {
-      teamAController.text = match.teamAId;
-      teamBController.text = match.teamBId;
+      teamAController.text = match.teamAName;
+      teamBController.text = match.teamBName;
     }
 
     return Scaffold(
@@ -54,10 +54,10 @@ class _MatchDetailsState extends State<MatchDetails> {
                       : () async {
                           if (_formKey.currentState?.validate() ?? false) {
                             if (adding) {
-                              match = MatchData(teamAId: '', teamBId: '');
+                              match = MatchData(teamAName: '', teamBName: '');
                             }
-                            match!.teamAId = teamAController.text;
-                            match!.teamBId = teamBController.text;
+                            match!.teamAName = teamAController.text;
+                            match!.teamBName = teamBController.text;
                             if (adding) {
                               await matchModel.add(match!);
                             } else {

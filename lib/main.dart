@@ -4,9 +4,7 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import 'match_briefing.dart';
-import 'match_model.dart';
-import 'team_model.dart';
-import 'player_model.dart';
+import 'model/match_model.dart';
 import 'new_match_flow.dart';
 
 Future main() async{
@@ -29,8 +27,6 @@ class MyApp extends StatelessWidget
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => MatchModel()),
-        ChangeNotifierProvider(create: (_) => TeamModel()),
-        ChangeNotifierProvider(create: (_) => PlayerModel()),
       ],
       child: MaterialApp(
             title: 'AFL Counter',
@@ -98,7 +94,6 @@ class _MyHomePageState extends State<MyHomePage>
                   child: ListView.builder(
                       itemBuilder: (_, index) {
                         var match = matchModel.items[index];
-                        var teamModel = Provider.of<TeamModel>(context, listen: false);
                         return Dismissible(
                           key: Key(match.id),
                           direction: DismissDirection.endToStart,
@@ -114,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage>
                                 const SnackBar(content: Text("Match deleted")));
                           },
                           child: ListTile(
-                            title: Text("${teamModel.get(match.teamAId)?.name ?? match.teamAId} vs ${teamModel.get(match.teamBId)?.name ?? match.teamBId}"),
+                            title: Text("${match.teamAName} vs ${match.teamBName}"),
                             // No status tracking for now
                             onTap: () {
                               Navigator.push(

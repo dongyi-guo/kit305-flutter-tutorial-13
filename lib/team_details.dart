@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'team_model.dart';
-import 'player_model.dart';
+import 'model/team_model.dart';
+import 'model/player_model.dart';
 import 'player_details.dart';
-import 'afl_models.dart';
+import 'model/afl_models.dart';
 
 class TeamDetails extends StatefulWidget {
   final String? id;

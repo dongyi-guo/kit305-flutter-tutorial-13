@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'afl_models.dart';
-import 'match_model.dart';
-import 'team_model.dart';
-import 'player_model.dart';
+import 'model/afl_models.dart';
+import 'model/match_model.dart';
 import 'live_match_page.dart';
 
 /// Displays a summary of the two teams before recording a match.
@@ -19,8 +17,6 @@ class MatchBriefingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final matchModel = Provider.of<MatchModel>(context);
-    final teamModel = Provider.of<TeamModel>(context);
-    final playerModel = Provider.of<PlayerModel>(context);
 
     final match = matchModel.get(matchId);
     if (match == null) {
@@ -30,19 +26,8 @@ class MatchBriefingPage extends StatelessWidget {
       );
     }
 
-    final teamA = teamModel.get(match.teamAId);
-    final teamB = teamModel.get(match.teamBId);
-
-    final teamAPlayers = teamA == null
-        ? <Player>[]
-        : playerModel.items
-            .where((p) => teamA.players.contains(p.id))
-            .toList();
-    final teamBPlayers = teamB == null
-        ? <Player>[]
-        : playerModel.items
-            .where((p) => teamB.players.contains(p.id))
-            .toList();
+    final teamAPlayers = match.teamAPlayers;
+    final teamBPlayers = match.teamBPlayers;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,9 +39,9 @@ class MatchBriefingPage extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _teamColumn(teamA?.name ?? match.teamAId, teamAPlayers)),
+            Expanded(child: _teamColumn(match.teamAName, teamAPlayers)),
             const SizedBox(width: 8),
-            Expanded(child: _teamColumn(teamB?.name ?? match.teamBId, teamBPlayers)),
+            Expanded(child: _teamColumn(match.teamBName, teamBPlayers)),
           ],
         ),
       ),

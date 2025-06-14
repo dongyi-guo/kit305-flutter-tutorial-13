@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'afl_models.dart';
+import 'model/afl_models.dart';
 
 class PlayerModel extends ChangeNotifier {
   final List<Player> items = [];

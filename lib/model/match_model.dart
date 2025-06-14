@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'afl_models.dart';
+import 'model/afl_models.dart';
 
 /// Provider model that stores and retrieves [MatchData] objects from
 /// Firebase Firestore.
@@ -50,7 +50,7 @@ class MatchModel extends ChangeNotifier {
     loading = true;
     notifyListeners();
 
-    var snapshot = await matchesCollection.orderBy('team_a').get();
+    var snapshot = await matchesCollection.orderBy('team_a_name').get();
 
     for (var doc in snapshot.docs) {
       var match = MatchData.fromMap(doc.data() as Map<String, dynamic>, doc.id);

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'afl_models.dart';
+import 'model/afl_models.dart';
 import 'player_form.dart';
-import 'team_model.dart';
-import 'player_model.dart';
-import 'match_model.dart';
+import 'model/match_model.dart';
 import 'match_briefing.dart';
 
 /// Step based UI for creating a match with teams and players.
@@ -202,30 +200,14 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
       return;
     }
 
-    var teamModel = Provider.of<TeamModel>(context, listen: false);
-    var playerModel = Provider.of<PlayerModel>(context, listen: false);
     var matchModel = Provider.of<MatchModel>(context, listen: false);
 
-    // Save team A and players
-    var teamA = Team(name: teamAController.text);
-    teamA.id = await teamModel.add(teamA);
-    for (var p in teamAPlayers) {
-      var id = await playerModel.add(p);
-      teamA.players.add(id);
-    }
-    await teamModel.updateItem(teamA.id, teamA);
-
-    // Save team B
-    var teamB = Team(name: teamBController.text);
-    teamB.id = await teamModel.add(teamB);
-    for (var p in teamBPlayers) {
-      var id = await playerModel.add(p);
-      teamB.players.add(id);
-    }
-    await teamModel.updateItem(teamB.id, teamB);
-
-    // Save match
-    var match = MatchData(teamAId: teamA.id, teamBId: teamB.id);
+    var match = MatchData(
+      teamAName: teamAController.text,
+      teamBName: teamBController.text,
+      teamAPlayers: teamAPlayers,
+      teamBPlayers: teamBPlayers,
+    );
     match.id = await matchModel.add(match);
 
     if (!mounted) return;

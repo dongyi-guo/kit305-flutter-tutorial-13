@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import 'player_model.dart';
-import 'team_model.dart';
-import 'afl_models.dart';
+import 'model/player_model.dart';
+import 'model/team_model.dart';
+import 'model/afl_models.dart';
 
 class PlayerDetails extends StatefulWidget {
   final String? id;
