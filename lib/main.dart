@@ -4,6 +4,7 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import 'match_briefing.dart';
+import 'match_details_page.dart';
 import 'model/match_model.dart';
 import 'model/afl_models.dart';
 import 'new_match_flow.dart';
@@ -131,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage>
                                   context,
                                   MaterialPageRoute(
                                       builder: (_) =>
-                                          MatchBriefingPage(matchId: match.id)));
+                                          MatchDetailsPage(matchId: match.id)));
                             },
                           ),
                         );

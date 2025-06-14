@@ -5,10 +5,11 @@ enum ActionType { kick, handball, mark, tackle, goal, behind }
 
 /// Single action performed by a player during a match.
 class PlayerAction {
-  PlayerAction({required this.type, required this.timestamp});
+  PlayerAction({required this.type, required this.timestamp, required this.quarter});
 
   ActionType type;
   int timestamp;
+  int quarter;
 
   factory PlayerAction.fromMap(Map<String, dynamic> map) => PlayerAction(
         type: ActionType.values.firstWhere(
@@ -16,11 +17,13 @@ class PlayerAction {
           orElse: () => ActionType.kick,
         ),
         timestamp: map['timestamp'] as int? ?? 0,
+        quarter: map['quarter'] as int? ?? 1,
       );
 
   Map<String, dynamic> toMap() => {
         'type': describeEnum(type),
         'timestamp': timestamp,
+        'quarter': quarter,
       };
 }
 

@@ -76,6 +76,7 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
       var action = PlayerAction(
         type: type,
         timestamp: DateTime.now().difference(startTime).inSeconds,
+        quarter: quarter,
       );
       selected.actions.add(action);
       await matchModel.updateItem(match.id, match);
