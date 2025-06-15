@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
-import 'match_briefing.dart';
 import 'match_details_page.dart';
 import 'model/match_model.dart';
 import 'model/afl_models.dart';
