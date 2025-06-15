@@ -193,11 +193,13 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
           children: [
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    quarter++;
-                  });
-                },
+                onPressed: quarter >= 4
+                    ? null
+                    : () {
+                        setState(() {
+                          quarter++;
+                        });
+                      },
                 child: const Text('End Quarter'),
               ),
             ),

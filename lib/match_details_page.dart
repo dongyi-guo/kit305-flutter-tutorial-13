@@ -1,3 +1,4 @@
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -263,6 +264,11 @@ class MatchDetailsPage extends StatelessWidget {
                   for (var q = 1; q <= 4; q++) DropdownMenuItem(value: q, child: Text('Quarter $q')),
                 ],
               ),
+              if (player != null && player!.image != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Image.file(File(player!.image!), height: 120),
+                ),
               if (stats != null) ...[
                 statRow('Disposals', stats['disposals']!),
                 statRow('Marks', stats['marks']!),
