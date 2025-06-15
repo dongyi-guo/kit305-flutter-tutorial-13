@@ -82,14 +82,12 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          var numbers = players.map((p) => p.number).toList();
           var player = await Navigator.push<Player?>(
-              context, MaterialPageRoute(builder: (_) => const PlayerForm()));
+              context,
+              MaterialPageRoute(
+                  builder: (_) => PlayerForm(takenNumbers: numbers)));
           if (player != null) {
-            if (players.any((p) => p.number == player.number)) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Duplicate player number')));
-              return;
-            }
             setState(() {
               players.add(player);
             });
@@ -123,17 +121,16 @@ class _NewMatchFlowState extends State<NewMatchFlow> {
                     title: Text(p.name),
                     subtitle: Text('No. ${p.number}'),
                     onTap: () async {
+                      var numbers = players
+                          .where((other) => other != p)
+                          .map((other) => other.number)
+                          .toList();
                       var updated = await Navigator.push<Player?>(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => PlayerForm(player: p)));
+                              builder: (_) =>
+                                  PlayerForm(player: p, takenNumbers: numbers)));
                       if (updated != null) {
-                        if (players
-                            .any((other) => other != p && other.number == updated.number)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Duplicate player number')));
-                          return;
-                        }
                         setState(() {
                           players[index] = updated;
                         });

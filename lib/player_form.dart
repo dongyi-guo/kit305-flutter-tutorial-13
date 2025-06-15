@@ -1,4 +1,6 @@
-import 'dart:convert';
+import 'dart:io';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,7 +10,9 @@ import 'model/afl_models.dart';
 /// Form used for creating or editing a [Player] without touching Firestore.
 class PlayerForm extends StatefulWidget {
   final Player? player;
-  const PlayerForm({Key? key, this.player}) : super(key: key);
+  final List<int> takenNumbers;
+  const PlayerForm({Key? key, this.player, this.takenNumbers = const []})
+      : super(key: key);
 
   @override
   State<PlayerForm> createState() => _PlayerFormState();
@@ -18,7 +22,7 @@ class _PlayerFormState extends State<PlayerForm> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final numberController = TextEditingController();
-  String? imageData;
+  String? imagePath;
 
   @override
   void initState() {
@@ -26,7 +30,7 @@ class _PlayerFormState extends State<PlayerForm> {
     if (widget.player != null) {
       nameController.text = widget.player!.name;
       numberController.text = widget.player!.number.toString();
-      imageData = widget.player!.image;
+      imagePath = widget.player!.image;
     }
   }
 
@@ -43,16 +47,18 @@ class _PlayerFormState extends State<PlayerForm> {
           key: _formKey,
           child: Column(
             children: [
-              if (imageData != null)
-                Image.memory(base64Decode(imageData!), height: 120),
+              if (imagePath != null)
+                Image.file(File(imagePath!), height: 120),
               TextButton.icon(
                 onPressed: () async {
                   final picker = ImagePicker();
                   final image = await picker.pickImage(source: ImageSource.gallery);
                   if (image != null) {
-                    final bytes = await image.readAsBytes();
+                    final dir = await getApplicationDocumentsDirectory();
+                    final fileName = p.basename(image.path);
+                    final saved = await File(image.path).copy(p.join(dir.path, fileName));
                     setState(() {
-                      imageData = base64Encode(bytes);
+                      imagePath = saved.path;
                     });
                   }
                 },
@@ -78,10 +84,16 @@ class _PlayerFormState extends State<PlayerForm> {
               ElevatedButton.icon(
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
+                    int num = int.tryParse(numberController.text) ?? 0;
+                    if (widget.takenNumbers.contains(num)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Duplicate player number')));
+                      return;
+                    }
                     var player = widget.player ?? Player(name: '', number: 0);
                     player.name = nameController.text;
-                    player.number = int.tryParse(numberController.text) ?? 0;
-                    player.image = imageData;
+                    player.number = num;
+                    player.image = imagePath;
                     Navigator.pop(context, player);
                   }
                 },
