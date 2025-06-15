@@ -1,15 +1,15 @@
 # AFL Counter App
 
-This project is a modified version of the week 13 Flutter tutorial. It has been reworked into an AFL scoring and statistics tracker. The app uses Firebase Firestore for storing match, team and player data and allows recording player actions during a match.
+> Dongyi Guo, 662970
+
+This assignment is based on week 13 Flutter & Firebase tutorial, reworked into the AFL scoring and statistics tracker.
 
 ## Test Device
-- **Android emulator** – API 34 (Android 14). The app was developed and run against this target.
+
+Tested with Chrome and use Dev Tools to simulate a mobile device.
 
 ## References
-- Flutter and Firebase tutorials from the KIT305 labs and lecture material.
-- [FlutterFire documentation](https://firebase.flutter.dev/) for Firebase initialisation and Firestore use.
-- Various snippets from StackOverflow for image picker/file handling and table layouts.
-- ChatGPT was used extensively to generate boilerplate code, refactor the project into models for matches, teams and players, and to implement the live match recording and statistics screens. The full conversation is available in the assignment submission.
+
 
 ## Screen Overview
 
