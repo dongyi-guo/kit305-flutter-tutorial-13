@@ -134,23 +134,44 @@ class MatchDetailsPage extends StatelessWidget {
 
     Widget teamStatsTab() {
       int? selectedQuarter;
+      TableRow buildRow(String label, int a, int b) {
+        TextStyle styleA =
+            TextStyle(fontWeight: a > b ? FontWeight.bold : FontWeight.normal);
+        TextStyle styleB =
+            TextStyle(fontWeight: b > a ? FontWeight.bold : FontWeight.normal);
+        return TableRow(children: [
+          Padding(padding: const EdgeInsets.all(4), child: Text(label)),
+          Padding(padding: const EdgeInsets.all(4), child: Text('$a', style: styleA)),
+          Padding(padding: const EdgeInsets.all(4), child: Text('$b', style: styleB)),
+        ]);
+      }
+
       return StatefulBuilder(builder: (context, setState) {
         var statsA = teamStats(true, quarter: selectedQuarter);
         var statsB = teamStats(false, quarter: selectedQuarter);
-        Widget row(String label, int a, int b) {
-          TextStyle styleA = TextStyle(fontWeight: a > b ? FontWeight.bold : FontWeight.normal);
-          TextStyle styleB = TextStyle(fontWeight: b > a ? FontWeight.bold : FontWeight.normal);
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Expanded(child: Text(label)),
-                Expanded(child: Text('$a', style: styleA)),
-                Expanded(child: Text('$b', style: styleB)),
-              ],
-            ),
-          );
-        }
+        List<TableRow> rows = [
+          TableRow(
+            decoration: BoxDecoration(color: Colors.grey.shade200),
+            children: [
+              const Padding(padding: EdgeInsets.all(4), child: Text('Stat')),
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(match.teamAName),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(match.teamBName),
+              ),
+            ],
+          ),
+          buildRow('Disposals', statsA['disposals']!, statsB['disposals']!),
+          buildRow('Marks', statsA['marks']!, statsB['marks']!),
+          buildRow('Tackles', statsA['tackles']!, statsB['tackles']!),
+          buildRow('Score',
+              statsA['goals']! * 6 + statsA['behinds']!,
+              statsB['goals']! * 6 + statsB['behinds']!),
+        ];
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -160,17 +181,17 @@ class MatchDetailsPage extends StatelessWidget {
                 hint: const Text('Overall'),
                 onChanged: (value) => setState(() => selectedQuarter = value),
                 items: [
-                  const DropdownMenuItem<int?>(value: null, child: Text('Overall')),
+                  const DropdownMenuItem<int?>(
+                      value: null, child: Text('Overall')),
                   for (var q = 1; q <= 4; q++)
                     DropdownMenuItem(value: q, child: Text('Quarter $q')),
                 ],
               ),
-              row('Disposals', statsA['disposals']!, statsB['disposals']!),
-              row('Marks', statsA['marks']!, statsB['marks']!),
-              row('Tackles', statsA['tackles']!, statsB['tackles']!),
-              row('Score',
-                  statsA['goals']! * 6 + statsA['behinds']!,
-                  statsB['goals']! * 6 + statsB['behinds']!),
+              const SizedBox(height: 8),
+              Table(
+                border: TableBorder.all(color: Colors.grey),
+                children: rows,
+              ),
             ],
           ),
         );
@@ -265,17 +286,16 @@ class MatchDetailsPage extends StatelessWidget {
         var statsB = b != null ? playerStats(b!, quarter: quarter) : null;
         TextStyle style(int? va, int? vb) =>
             TextStyle(fontWeight: (va ?? 0) > (vb ?? 0) ? FontWeight.bold : FontWeight.normal);
-        Widget row(String label, int? va, int? vb) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Expanded(child: Text(label)),
-                Expanded(child: Text(va?.toString() ?? '-', style: style(va, vb))),
-                Expanded(child: Text(vb?.toString() ?? '-', style: style(vb, va))),
-              ],
-            ),
-          );
+        TableRow row(String label, int? va, int? vb) {
+          return TableRow(children: [
+            Padding(padding: const EdgeInsets.all(4), child: Text(label)),
+            Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(va?.toString() ?? '-', style: style(va, vb))),
+            Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(vb?.toString() ?? '-', style: style(vb, va))),
+          ]);
         }
         return SingleChildScrollView(
           padding: const EdgeInsets.all(8),
@@ -285,13 +305,13 @@ class MatchDetailsPage extends StatelessWidget {
                 value: a,
                 hint: const Text('Player A'),
                 onChanged: (v) => setState(() => a = v),
-                items: [for (var p in players) DropdownMenuItem(value: p, child: Text('${p.name} (No.${p.number})'))],
+                items: [for (var p in players.where((p) => p != b)) DropdownMenuItem(value: p, child: Text('${p.name} (No.${p.number})'))],
               ),
               DropdownButton<Player>(
                 value: b,
                 hint: const Text('Player B'),
                 onChanged: (v) => setState(() => b = v),
-                items: [for (var p in players) DropdownMenuItem(value: p, child: Text('${p.name} (No.${p.number})'))],
+                items: [for (var p in players.where((p) => p != a)) DropdownMenuItem(value: p, child: Text('${p.name} (No.${p.number})'))],
               ),
               DropdownButton<int?>(
                 value: quarter,
@@ -303,12 +323,32 @@ class MatchDetailsPage extends StatelessWidget {
                 ],
               ),
               if (a != null && b != null) ...[
-                row('Disposals', statsA!['disposals'], statsB!['disposals']),
-                row('Marks', statsA['marks'], statsB['marks']),
-                row('Tackles', statsA['tackles'], statsB['tackles']),
-                row('Score',
-                    statsA['goals']! * 6 + statsA['behinds']!,
-                    statsB['goals']! * 6 + statsB['behinds']!),
+                const SizedBox(height: 8),
+                Table(
+                  border: TableBorder.all(color: Colors.grey),
+                  children: [
+                    TableRow(
+                      decoration: BoxDecoration(color: Colors.grey.shade200),
+                      children: [
+                        const Padding(padding: EdgeInsets.all(4), child: Text('Stat')),
+                        Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Text(a!.name),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Text(b!.name),
+                        ),
+                      ],
+                    ),
+                    row('Disposals', statsA!['disposals'], statsB!['disposals']),
+                    row('Marks', statsA['marks'], statsB['marks']),
+                    row('Tackles', statsA['tackles'], statsB['tackles']),
+                    row('Score',
+                        statsA['goals']! * 6 + statsA['behinds']!,
+                        statsB['goals']! * 6 + statsB['behinds']!),
+                  ],
+                ),
               ]
             ],
           ),

@@ -18,7 +18,8 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
   late DateTime startTime;
   int quarter = 1;
   bool teamASelected = true;
-  Player? selectedPlayer;
+  Player? selectedPlayerA;
+  Player? selectedPlayerB;
 
   @override
   void initState() {
@@ -42,7 +43,13 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
     final teamBPlayers = match.teamBPlayers;
 
     final players = teamASelected ? teamAPlayers : teamBPlayers;
-    final selected = selectedPlayer;
+    // Ensure a player is selected for the current team
+    if (teamASelected) {
+      selectedPlayerA ??= players.isNotEmpty ? players.first : null;
+    } else {
+      selectedPlayerB ??= players.isNotEmpty ? players.first : null;
+    }
+    final selected = teamASelected ? selectedPlayerA : selectedPlayerB;
 
     String scoreFor(List<Player> ps) {
       int goals = 0;
@@ -108,7 +115,6 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
             onPressed: (index) {
               setState(() {
                 teamASelected = index == 0;
-                selectedPlayer = null;
               });
             },
             children: [
@@ -129,11 +135,15 @@ class _LiveMatchPageState extends State<LiveMatchPage> {
               itemCount: players.length,
               itemBuilder: (_, index) {
                 var p = players[index];
-                bool selectedFlag = p == selectedPlayer;
+                bool selectedFlag = p == selected;
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      selectedPlayer = p;
+                      if (teamASelected) {
+                        selectedPlayerA = p;
+                      } else {
+                        selectedPlayerB = p;
+                      }
                     });
                   },
                   child: Container(
